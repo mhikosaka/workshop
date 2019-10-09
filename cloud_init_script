@@ -1,0 +1,23 @@
+#!/bin/bash -x
+echo '################### webserver userdata begins #####################'
+touch ~opc/userdata.`date +%s`.start
+# echo '########## yum update all ###############'
+# yum update -y
+echo '########## basic webserver ##############'
+yum install -y httpd php stress
+systemctl enable  httpd.service
+systemctl start  httpd.service
+echo '<html><head><meta http-equiv="refresh" content="3"></head><body><pre><code>
+<?php
+echo gethostname();
+$ip_server = $_SERVER['SERVER_ADDR'];
+echo "<br><h1><b>Server IP Address is: $ip_server</b></h1><br>";
+?>' >> /var/www/html/index.php
+echo '' >> /var/www/html/index.php
+cat /etc/os-release >> /var/www/html/index.php
+echo '</code></pre></body></html>' >> /var/www/html/index.php
+firewall-offline-cmd --add-service=http
+systemctl enable  firewalld
+systemctl restart  firewalld
+touch ~opc/userdata.`date +%s`.finish
+echo '################### webserver userdata ends #######################'
